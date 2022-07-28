@@ -16,6 +16,14 @@ const UserSchema = new mongoose.Schema({
   paymentPasscode: {
     type: String,
     required: true
+  },
+  emailVerificationCode:{
+    type: String,
+    required: false
+  },
+  isEmailVerified:{
+    type: Boolean,
+    required: false
   }
 });
 
