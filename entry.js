@@ -5,6 +5,7 @@ const db = require('./modules/dbConnection')
 const bp = require('body-parser')
 const authRouter = require('./routes/authRoute')
 const tokenRouter = require('./routes/tokenRoute');
+const footballRouter = require('./routes/footballRoute');
 const cors = require('cors')
 // Server config.
 const app = express()
@@ -19,4 +20,5 @@ db.once("open", function () {
 //Routes
 app.use("/auth", authRouter) //authorizaion
 app.use('/token', tokenRouter) //operations related to crypto tokens
+app.use('/football', footballRouter)
 app.listen(constants.PORT)
