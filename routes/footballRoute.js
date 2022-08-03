@@ -16,7 +16,7 @@ router.get('/get-match-list', async (req, res) => {
 })
 // return the name and ids of all tournaments
 // response.response for the response
-router.get('/get-tournament-ids', async (req, res) => {
+router.get('/get-tournaments', async (req, res) => {
     const response = await getTournamentIdService();
     res.send(response);
 })
