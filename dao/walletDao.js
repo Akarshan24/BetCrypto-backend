@@ -26,5 +26,20 @@ const getPublicKeys = async (alias) => {
     }
     return ({ status: OK, data: response });
 }
+const getWalletInfo = async (alias, currency) => {
+    var token;
+    if (currency == 'BTC')
+        token = 'bitcoin';
+    var response;
+    try {
+        response = await walletModel.findOne({ alias }).select(`${token}`);
+    }
+    catch (err) {
+        console.log("Error while fetching wallets: ", err);
+        return ({ status: INTERNAL_ERROR, message: err });
+    }
+    return ({ status: OK, data: response });
+}
 module.exports.saveWallets = saveWallets;
 module.exports.getPublicKeys = getPublicKeys;
+module.exports.getWalletInfo = getWalletInfo;

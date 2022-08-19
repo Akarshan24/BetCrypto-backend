@@ -20,5 +20,34 @@ const getMatchesForTournament = async (tournament) => {
     }).clone().catch(function (err) { console.log(err) });
     return ({ status: OK, response });
 }
+const getMatch = async (id) => {
+    const response = await FootballMatch.findOne({ id }, (err, res) => {
+        if (err) {
+            return ({ status: INTERNAL_ERROR });
+        }
+    }).clone().catch(function (err) { console.log(err) });
+    return ({ status: OK, response });
+}
+module.exports.getFinishedMatches = async (present) => {
+    const threshold = present - 10800000; // any match that started 3 hrs before present time
+    const response = await FootballMatch.find({ dateTime: { $lte: threshold } }, (err, res) => {
+        if (err) {
+            return ({ status: INTERNAL_ERROR });
+        }
+    }).clone().catch(function (err) { console.log(err) });
+    return ({ status: OK, data: response });
+}
+module.exports.updateMatchDetails = async (id, object) => {
+    try {
+        const response = await FootballMatch.updateOne({ id }, object);
+        return ({ status: OK });
+    }
+    catch (err) {
+        console.log("Error updating match details:%s", err);
+        return ({ status: INTERNAL_ERROR });
+    }
+
+}
+module.exports.getMatch = getMatch
 module.exports.saveMatchDetails = saveMatchDetails
 module.exports.getMatchesForTournament = getMatchesForTournament;

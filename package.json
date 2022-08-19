@@ -18,7 +18,11 @@
     "mongoose": "^6.4.4",
     "node-cron": "^3.0.1",
     "node-fetch": "^2.6.7",
-    "nodemailer": "^6.7.7"
+    "nodemailer": "^6.7.7",
+    "bitcore-lib": "8.25.36",
+    "coininfo": "^5.2.1",
+    "axios": "^0.27.2"
+
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
