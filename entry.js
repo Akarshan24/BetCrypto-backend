@@ -11,7 +11,9 @@ const cors = require('cors')
 const app = express()
 app.use(bp.json())
 app.use(bp.urlencoded({ extended: true }))
-app.use(cors())
+app.use(cors({
+  origin: '*'
+}))
 //DB connection test.
 db.on("error", console.error.bind(console, "connection error: "));
 db.once("open", function () {

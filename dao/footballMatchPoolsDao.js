@@ -1,8 +1,8 @@
 const { OK, INTERNAL_ERROR } = require('../constants');
 const FootballMatchPools = require('../models/footballMatchPoolsModel')
-module.exports.saveBettingPoolWallet = async (currency, matchId, tournamentId, slot, poolCapacity, entryFee, keys) => {
+module.exports.saveBettingPoolWallet = async (currency, matchId, tournamentId, poolCategory, slot, poolCapacity, entryFee, keys) => {
     try {
-        const response = await FootballMatchPools.create({ matchId, tournamentId, poolCapacity, slot, entryFee, isOpen: true, poolWallet: { currency, privateKey: keys.privateKey, publicKey: keys.publicKey }, betsPlaced: 0 });
+        const response = await FootballMatchPools.create({ matchId, tournamentId, poolCategory, poolCapacity, slot, entryFee, isOpen: true, poolWallet: { currency, privateKey: keys.privateKey, publicKey: keys.publicKey }, betsPlaced: 0 });
         if (response)
             return ({ status: OK })
     }

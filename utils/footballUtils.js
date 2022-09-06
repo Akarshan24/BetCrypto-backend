@@ -1,4 +1,4 @@
-const { INTERNAL_ERROR, OK, ADMIN_WALLET_PUBLIC_KEY } = require("../constants");
+const { INTERNAL_ERROR, OK, ADMIN_WALLET_PUBLIC_KEY, SUPPORTED_TOKENS, ENTRY_FEE_LIST, POOL_CAPACITY } = require("../constants");
 const { addTransactionToLogs } = require("../dao/betLogsDao");
 const { getBetsByPool } = require("../dao/footballMatchBetsDao");
 const { getPoolsFromMatchId } = require("../dao/footballMatchPoolsDao");
@@ -6,6 +6,30 @@ const { addToPendingList } = require("../dao/pendingTransactionsDao");
 const { getBTCExchangeRate, getBTCBalance } = require("../modules/bitcoin");
 const { transferTokens, getBalance, getExchangeRate, getAdminWalletAddress } = require("../service/tokenService");
 
+module.exports.clubRawPoolsList = (poolsList, slot) => {
+    // club similar pools of same cryptos together
+    // we just need pubKey, entry fee, bets placed, pool capacity
+    var response = [];
+    var pool = {};
+    let x = 0;
+    for (let fee in ENTRY_FEE_LIST) {
+        for (let capacity in POOL_CAPACITY) {
+            pool.entryFee = ENTRY_FEE_LIST[fee];
+            pool.poolCapacity = POOL_CAPACITY[capacity];
+            pool.slot = slot;
+            pool.walletList = [];
+            for (let index in poolsList) {
+                if (poolsList[index].entryFee === pool.entryFee && poolsList[index].poolCapacity === pool.poolCapacity) {
+                    pool.walletList.push({ key: poolsList[index].poolWallet.publicKey, currency: poolsList[index].poolWallet.currency, betsPlaced: poolsList[index].betsPlaced });
+                }
+            }
+            if (pool.walletList != undefined && pool.walletList.length > 0)
+                response.push(pool);
+            pool = {};
+        }
+    }
+    return response;
+}
 module.exports.determineSlot = (matchDateTime) => {
     const present = new Date();
     const matchDate = new Date(matchDateTime);

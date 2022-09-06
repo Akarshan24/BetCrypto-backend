@@ -6,8 +6,9 @@ const { createBettingPoolWallet, transferTokens } = require('./tokenService');
 const { saveBetDetails } = require('../dao/footballMatchBetsDao');
 const { getWalletInfo } = require('../dao/walletDao');
 const { saveBettingPoolWallet, getPoolDetailsFromPoolWallet, getPoolsFromMatchIdAndSlot, getPoolsFromMatchId } = require('../dao/footballMatchPoolsDao.js');
-const { determineSlot } = require('../utils/footballUtils');
+const { determineSlot, clubRawPoolsList } = require('../utils/footballUtils');
 const { addTransactionToLogs } = require('../dao/betLogsDao');
+const { json } = require('body-parser');
 // TODO: this will run everyday at 00:00 UTC
 const updateMatchListService = async () => {
     const date = new Date();
@@ -71,33 +72,39 @@ const getMatchFromId = async (id) => {
     response = await getPoolsFromMatchIdAndSlot(id, slot);
     if (response.status === INTERNAL_ERROR)
         return ({ status: INTERNAL_ERROR });
-    data.poolsList = response.response; // appending pools list
-    return ({ status: OK, response: data });
+    // appending pools list
+    const pools = clubRawPoolsList(response.response, slot);
+    console.log("Appended pools:", data);
+    return ({ status: OK, matchDetails: data, pools: pools });
 }
 const createPoolsForNewMatch = async (matchId, tournamentId) => {
     for (let currency in SUPPORTED_TOKENS) {
         for (let poolCapacity in POOL_CAPACITY) {
             for (let slot in POOL_SLOTS) {
                 for (let entryFee in ENTRY_FEE_LIST) {
-                    if (POOL_CAPACITY[poolCapacity] <= 20 && ENTRY_FEE_LIST[entryFee] <= 5)
+                    if (POOL_SLOTS[slot] == 2 && ENTRY_FEE_LIST[entryFee] <= 5)
                         continue;
-                    if ((POOL_SLOTS[slot] > 1 && POOL_CAPACITY[poolCapacity] > 50) || (POOL_SLOTS[slot] > 2 && POOL_CAPACITY[poolCapacity] > 20))
+                    else if (POOL_SLOTS[slot] == 3 && ENTRY_FEE_LIST[entryFee] <= 10)
+                        continue;
+                    if (POOL_CAPACITY[poolCapacity] == 2 && ENTRY_FEE_LIST[entryFee] <= 10)
+                        continue;
+                    if (POOL_CAPACITY[poolCapacity] == 5 && ENTRY_FEE_LIST[entryFee] <= 5)
                         continue;
                     var poolCategory;
-                    if (POOL_CAPACITY[poolCapacity] < 20)
-                        poolCategory = 'WINNER_TAKES_ALL';
+                    if (POOL_CAPACITY[poolCapacity] != Infinity)
+                        poolCategory = "WINNER_TAKES_ALL";
                     else
-                        poolCategory = 'DISTRIBUTED';
+                        poolCategory = "DISTRIBUTED";
                     await createBettingPoolService(SUPPORTED_TOKENS[currency], matchId, tournamentId, poolCategory, POOL_SLOTS[slot], POOL_CAPACITY[poolCapacity], ENTRY_FEE_LIST[entryFee]);
                 }
             }
         }
     }
 }
-const createBettingPoolService = async (currency, matchId, tournamentId, slot, poolCapacity, entryFee) => {
+const createBettingPoolService = async (currency, matchId, tournamentId, poolCategory, slot, poolCapacity, entryFee) => {
     const keys = createBettingPoolWallet(currency);
     if (keys) {
-        const response = await saveBettingPoolWallet(currency, matchId, tournamentId, slot, poolCapacity, entryFee, keys)
+        const response = await saveBettingPoolWallet(currency, matchId, tournamentId, poolCategory, slot, poolCapacity, entryFee, keys)
         if (response.status === OK)
             return response;
         console.log("Error while saving wallet. Request:%s\nResponse:%s", ({ currency, matchId, tournamentId, slot, poolCapacity, entryFee, keys }), response)
@@ -175,10 +182,6 @@ module.exports.settleMatchService = async () => {
         await new Promise(r => setTimeout(r, 6000));
 
     }
-}
-module.exports.getPoolsForMatch = async (id, slot) => {
-    const response = await getPoolsFromMatchIdAndSlot(id, slot);
-    return response;
 }
 module.exports.getMatchFromId = getMatchFromId;
 module.exports.updateMatchListService = updateMatchListService;

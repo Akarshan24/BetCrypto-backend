@@ -8,7 +8,7 @@ module.exports = Object.freeze({
     FORBIDDEN: 403,
     INTERNAL_ERROR: 500,
     SUPPORTED_TOKENS: ['BTC'],
-    POOL_CAPACITY: [5, 10, 20, 50, 100],
+    POOL_CAPACITY: [2, 5, Infinity],
     POOL_SLOTS: [1, 2, 3],
     ENTRY_FEE_LIST: [5, 10, 20, 50],
     TESTNET_BTC: "BTCTEST",

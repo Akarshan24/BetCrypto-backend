@@ -36,10 +36,11 @@ router.post('/settle-match', async (req, res) => {
     const response = await settleMatchService();
     res.send(response);
 })
-router.post('/get-pools-for-match', async (req, res) => {
-    console.log(json.stringify(req));
-    const { id, slot } = req.body;
-    const response = await getPoolsForMatch(id, slot);
+router.get('/get-pools-for-match', async (req, res) => {
+    //console.log(req);
+    const { id } = req.query;
+    //console.log(id, slot);
+    const response = await getMatchFromId(id);
     console.log(response);
     //res.set({ 'Access-Control-Allow-Origin': 'http://localhost:3000' })
     res.send(response);
